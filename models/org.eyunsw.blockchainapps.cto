@@ -1,0 +1,219 @@
+/**
+ * Write your model definitions here
+ */
+
+namespace org.eyunsw.blockchainapps
+
+participant Reporter identified by reporterId {
+  o String reporterId
+  o String name
+  o String email
+  o String phone
+  o String reporterType
+  o String test optional
+}
+
+asset Location identified by locationId{
+  o String locationId
+  o String State
+  o String Street
+  o String postCode
+  o Integer buildingNumber
+  o PhoneNumber phone
+  o String email
+}
+
+enum EquipmentStatus{
+  o OPERATIONAL
+  o ISSUE_INITIATED
+  o MAINTENANCE_INITIATED
+}
+
+enum AssetType{
+  o GENERATOR
+  o LIGHT_BULB
+  o ACCESS_GATES
+}
+
+
+asset Equipment identified by asset_tag{
+  --> Manufacturer manufacturer
+  o String asset_tag
+  o String description
+  o DateTime date_of_purchase
+  o DateTime warrantyExpiry
+  o DateTime last_service
+  o AssetType asset_type
+  o EquipmentStatus status
+  o Boolean needInspection
+  --> Supplier supplier optional
+  o Boolean preferred_supplier
+  o Integer warranty
+  o Boolean raiseNotification
+}
+
+participant Manufacturer identified by manufacturerId{
+  o String manufacturerId
+  o String address
+  o String email
+  o String name
+}
+
+asset WarrantyClaimAsset identified by claimId{
+ --> Equipment equipment
+ --> Manufacturer manufacturer
+  o String claimId
+  o DateTime purchase_date
+}
+
+
+participant Company identified by companyId {
+  o String companyId
+  o PhoneNumber phoneNumber
+  o String email
+  o Address address
+  o Integer balance
+  o String name
+}
+
+participant Supplier identified by supplierId {
+  o String supplierId
+  o String supplierName
+  o String supplierType
+  o PhoneNumber phoneNumber
+  o String email
+  o Address address
+  o Integer balance
+}
+/**
+A concept for a simple street address
+*/
+concept Address {
+  o String city optional
+  o String country
+  o String street optional
+  o String zip optional
+}
+
+concept PhoneNumber{
+  o String areaCode
+  o String phoneNumber
+}
+
+
+enum Priority{
+  o High
+  o Medium
+  o Low
+}
+
+asset SafetyObservationAsset identified by safetyObservationId {
+  o String safetyObservationId
+  --> Reporter reporter
+  --> Location location
+  --> Equipment equipment
+  o DateTime date
+  o String description
+  o Priority priority
+  o Boolean needMaintenance
+  o Boolean raiseNotification
+}
+
+/**
+Safety observation transaction
+*/
+transaction safetyObservation {
+  --> Reporter reporter
+  --> Location location
+  --> Equipment equipment
+  o DateTime date
+  o String description
+  o Priority priority
+  o Boolean needMaintenance
+  o String safetyObservationId
+}
+
+/**
+Maintenance Order transaction
+*/
+enum maintenanceOrderStatus {
+  o CREATED
+  o SOURCING
+  o SUPPLIER_CONFIRMED
+  o WORK_IN_PROGRESS
+  o WORK_PERFORMED
+  o INSPECTION_REQUIRED
+  o REOPEN
+  o WORK_COMPLETED
+  o CLOSED
+}
+
+asset MaintenanceOrderAsset identified by MaintenanceOrderAssetId {
+   o String MaintenanceOrderAssetId
+   --> Location location
+   --> Equipment equipment
+   o DateTime date
+   o String description
+   o Priority priority
+   o String issueImageURL optional
+   o maintenanceOrderStatus status
+}
+
+transaction maintenanceOrderTransaction {
+   --> SafetyObservationAsset safetyobs
+   --> Location location
+   --> Equipment equipment
+   o DateTime date
+   o String description
+   o Priority priority
+   o String issueImageURL optional
+   o maintenanceOrderStatus status
+
+}
+
+
+enum RFQStatus{
+  o OPEN
+  o CLOSED
+}
+
+asset RFQ identified by RFQId {
+   o String RFQId
+   --> Equipment equipment
+   o String safety_observation_description
+   o Integer max_amount
+   o RFQStatus status
+   o BidOffer[] offers optional
+   o BidOffer chosenBid optional
+}
+
+/**
+Push the offer into the RFQ
+*/
+transaction BidOffer {
+    o Integer bidAmount
+    --> RFQ rfq
+    --> MaintenanceOrderAsset order
+    --> Company company
+    --> Supplier supplier
+}
+
+/**
+Use RFQ and go through all bid offers and find
+cheapest bid. Then update the respective rfq, maintenance order
+*/
+transaction CloseBidding {
+    --> RFQ rfq
+}
+
+
+/**
+Payment transaction
+*/
+transaction Ledger {
+  --> MaintenanceOrderAsset maintenanceOrder
+  --> Company company
+  --> Supplier supplier
+  o DateTime date
+  o Integer amount
+}

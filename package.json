@@ -1,0 +1,22 @@
+{
+  "name": "ey-p-and-u",
+  "version": "0.0.1",
+  "description": "UNSW Compass - EY P and U",
+  "scripts": {
+    "test": "mocha --recursive"
+  },
+  "author": "svajiraya",
+  "email": "s.vajiraya@unsw.edu.au",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "composer-admin": "latest",
+    "composer-client": "latest",
+    "composer-common": "latest",
+    "composer-connector-embedded": "latest",
+    "chai": "latest",
+    "eslint": "latest",
+    "istanbul": "latest",
+    "mkdirp": "latest",
+    "mocha": "latest"
+  }
+}
